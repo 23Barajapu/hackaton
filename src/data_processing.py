@@ -171,21 +171,19 @@ def preprocess_features(df_harvest: pd.DataFrame, df_weather: pd.DataFrame, scal
     df_weather_proc = pd.concat([df_weather_proc[['Wilayah', config.DATE_COLUMN]], df_weather_events, df_weather_impacts], axis=1)
 
     # Agregasi Harian ke Mingguan: Hitung JUMLAH kejadian per minggu
-    # Pastikan kolom Wilayah ada sebelum resample
-    if 'Wilayah' not in df_weather_proc.columns:
-        raise ValueError("Kolom 'Wilayah' tidak ditemukan di df_weather_proc")
-    
-    # Set index hanya ke Tanggal, lalu groupby Wilayah dan resample
+    # Set index ke Tanggal, lalu groupby Wilayah dan resample
+    # Simpan Wilayah sebagai kolom terpisah sebelum set_index
     df_weather_proc_indexed = df_weather_proc.set_index(config.DATE_COLUMN)
-    df_weather_weekly = df_weather_proc_indexed.groupby('Wilayah', group_keys=False).resample(config.TIME_AGGREGATION_RULE).sum(numeric_only=True).reset_index()
     
-    # Pastikan kolom Wilayah ada setelah reset_index
-    if 'Wilayah' not in df_weather_weekly.columns:
-        # Jika hilang, ambil dari index level jika ada
-        if isinstance(df_weather_weekly.index, pd.MultiIndex):
-            df_weather_weekly = df_weather_weekly.reset_index()
-        else:
-            raise ValueError("Kolom 'Wilayah' hilang setelah resample")
+    # Groupby dan resample, pastikan Wilayah tetap ada
+    df_weather_weekly = (df_weather_proc_indexed
+                        .groupby('Wilayah', group_keys=True)
+                        .resample(config.TIME_AGGREGATION_RULE)
+                        .sum(numeric_only=True)
+                        .reset_index(level=0, drop=False))  # Reset hanya level 0 (Tanggal), keep Wilayah
+    
+    # Reset index untuk mendapatkan Tanggal sebagai kolom
+    df_weather_weekly = df_weather_weekly.reset_index()
     
     df_weather_weekly['Tahun'] = df_weather_weekly[config.DATE_COLUMN].dt.year
 
