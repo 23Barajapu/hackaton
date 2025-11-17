@@ -1,0 +1,20 @@
+# --- Core ML & Data ---
+tensorflow
+pandas
+scikit-learn
+joblib
+
+# --- Hyperparameter Tuning ---
+keras-tuner
+
+# --- Supabase & Database ---
+supabase              # Klien API Python resmi [6, 7, 8]
+sqlalchemy            # Untuk koneksi DB langsung berkinerja tinggi [9]
+psycopg2-binary       # Driver Postgres untuk SQLAlchemy [5]
+
+# --- API Service ---
+fastapi               # Framework API [2, 10, 11]
+uvicorn[standard]     # Server untuk FastAPI
+
+# --- Utilities ---
+python-dotenv         # Untuk memuat file.env
