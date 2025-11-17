@@ -46,15 +46,8 @@ def predict_harvest_failure(region_name: str, start_date: str = None, use_csv: b
         # Untuk development: filter dari CSV
         df_harvest, df_weather = dp.load_data_from_csv()
         
-        # Debug: cek kolom yang ada
-        print(f"Kolom di df_harvest: {df_harvest.columns.tolist()}")
-        print(f"Kolom di df_weather: {df_weather.columns.tolist()}")
-        print(f"Wilayah unik di panen: {df_harvest[config.REGION_COLUMN].unique()[:10]}")
-        print(f"Wilayah unik di cuaca: {df_weather[config.REGION_COLUMN].unique()[:10]}")
-        
         # Filter data panen
         df_harvest = df_harvest[df_harvest[config.REGION_COLUMN] == region_name]
-        print(f"Data panen setelah filter: {df_harvest.shape}")
         
         # Normalisasi nama wilayah untuk matching yang lebih fleksibel
         # Hapus "Kab.", "Kota", dll untuk matching
@@ -79,35 +72,23 @@ def predict_harvest_failure(region_name: str, start_date: str = None, use_csv: b
         df_weather_normalized['_normalized_region'] = df_weather[config.REGION_COLUMN].apply(normalize_region_name)
         region_normalized = normalize_region_name(region_name)
         
-        print(f"Region name: '{region_name}' -> normalized: '{region_normalized}'")
-        print(f"Sample normalized cuaca regions: {df_weather_normalized['_normalized_region'].unique()[:10]}")
-        
         # Coba exact match dulu
         weather_mask = df_weather[config.REGION_COLUMN] == region_name
-        print(f"Exact match found: {weather_mask.sum()} rows")
-        
         # Jika tidak ada, coba dengan normalized name
         if not weather_mask.any():
             weather_mask = df_weather_normalized['_normalized_region'] == region_normalized
-            print(f"Normalized match found: {weather_mask.sum()} rows")
-        
         # Jika masih tidak ada, coba contains (region_name di dalam cuaca region)
         if not weather_mask.any():
             weather_mask = df_weather[config.REGION_COLUMN].str.contains(region_name, case=False, na=False)
-            print(f"Contains match found: {weather_mask.sum()} rows")
-        
         # Jika masih tidak ada, coba reverse contains (cuaca region di dalam region_name)
         if not weather_mask.any():
             weather_mask = df_weather_normalized['_normalized_region'].str.contains(region_normalized, case=False, na=False)
-            print(f"Normalized contains match found: {weather_mask.sum()} rows")
-        
         # Jika masih tidak ada, coba reverse - apakah region_name mengandung normalized cuaca region
         if not weather_mask.any():
             # Cek apakah ada normalized cuaca region yang ada di region_name
             for idx, norm_cuaca in enumerate(df_weather_normalized['_normalized_region']):
                 if region_normalized and norm_cuaca and (region_normalized in norm_cuaca or norm_cuaca in region_normalized):
                     weather_mask.iloc[idx] = True
-            print(f"Reverse contains match found: {weather_mask.sum()} rows")
         
         if start_date:
             df_weather[config.DATE_COLUMN] = pd.to_datetime(df_weather[config.DATE_COLUMN])
@@ -115,9 +96,6 @@ def predict_harvest_failure(region_name: str, start_date: str = None, use_csv: b
         else:
             df_weather = df_weather[weather_mask]
         
-        print(f"Data cuaca setelah filter: {df_weather.shape}")
-        if not df_weather.empty:
-            print(f"Wilayah yang ditemukan di cuaca: {df_weather[config.REGION_COLUMN].unique()[:5]}")
     else:
         # Untuk production: ambil dari Supabase
         if not start_date:

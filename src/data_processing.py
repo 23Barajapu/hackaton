@@ -143,6 +143,26 @@ def preprocess_features(df_harvest: pd.DataFrame, df_weather: pd.DataFrame, scal
     df_weather_proc = df_weather.rename(columns={config.REGION_COLUMN: "Wilayah"})
     df_weather_proc[config.DATE_COLUMN] = pd.to_datetime(df_weather_proc[config.DATE_COLUMN])
     
+    # Normalisasi nama wilayah untuk matching dengan data panen
+    def normalize_region_name(name):
+        if pd.isna(name):
+            return ""
+        name = str(name).strip()
+        # Hapus prefix umum (dengan spasi setelahnya)
+        prefixes = ["Kab. ", "Kabupaten ", "Kota ", "Kotamadya "]
+        for prefix in prefixes:
+            if name.startswith(prefix):
+                name = name[len(prefix):].strip()
+        # Juga coba tanpa spasi
+        prefixes_no_space = ["Kab.", "Kabupaten", "Kota", "Kotamadya"]
+        for prefix in prefixes_no_space:
+            if name.startswith(prefix) and len(name) > len(prefix):
+                name = name[len(prefix):].strip()
+        return name
+    
+    # Normalisasi nama wilayah di data cuaca
+    df_weather_proc['Wilayah'] = df_weather_proc['Wilayah'].apply(normalize_region_name)
+    
     # One-Hot Encoding untuk 'Cuaca Ekstrem' dan 'Dampak' 
     # Kita menggunakan str.get_dummies untuk menangani string gabungan (misal, "Hujan Lebat, Petir")
     df_weather_events = df_weather_proc[config.WEATHER_EVENT_COLUMN].str.get_dummies(sep=', ')
@@ -151,7 +171,7 @@ def preprocess_features(df_harvest: pd.DataFrame, df_weather: pd.DataFrame, scal
     df_weather_proc = pd.concat([df_weather_proc[['Wilayah', config.DATE_COLUMN]], df_weather_events, df_weather_impacts], axis=1)
 
     # Agregasi Harian ke Mingguan: Hitung JUMLAH kejadian per minggu
-    df_weather_weekly = df_weather_proc.set_index(config.DATE_COLUMN).groupby('Wilayah').resample(config.TIME_AGGREGATION_RULE).sum(numeric_only=True).reset_index()
+    df_weather_weekly = df_weather_proc.set_index(config.DATE_COLUMN).groupby('Wilayah', group_keys=False).resample(config.TIME_AGGREGATION_RULE, include_groups=False).sum(numeric_only=True).reset_index()
     df_weather_weekly['Tahun'] = df_weather_weekly[config.DATE_COLUMN].dt.year
 
     # === 3. Gabungkan Data Panen dan Cuaca ===
