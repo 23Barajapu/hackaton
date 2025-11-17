@@ -6,10 +6,13 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 import predict as pred_module
 import json
+import os
 
 app = FastAPI(
     title="Harvest Failure Prediction API",
@@ -32,15 +35,6 @@ class PredictionResponse(BaseModel):
     reasons: list = []
     mitigation_recommendations: list = []
     weather_forecast: dict = {}
-
-@app.get("/")
-async def root():
-    """Endpoint root untuk health check."""
-    return {
-        "message": "Harvest Failure Prediction API",
-        "status": "running",
-        "version": "1.0.0"
-    }
 
 @app.get("/health")
 async def health_check():
@@ -136,7 +130,21 @@ async def get_available_regions():
             detail=f"Error saat mengambil daftar wilayah: {str(e)}"
         )
 
+# Serve static files
+static_dir = os.path.join(os.path.dirname(__file__), 'static')
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+@app.get("/")
+async def serve_index():
+    """Serve the main HTML page."""
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    index_path = os.path.join(static_dir, 'index.html')
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Harvest Failure Prediction API", "status": "running", "version": "1.0.0", "docs": "/docs"}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8001)
 
