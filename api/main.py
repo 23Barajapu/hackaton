@@ -29,6 +29,9 @@ class PredictionResponse(BaseModel):
     prediction: str
     risk_level: str
     confidence: str
+    reasons: list = []
+    mitigation_recommendations: list = []
+    weather_forecast: dict = {}
 
 @app.get("/")
 async def root():

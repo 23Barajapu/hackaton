@@ -131,13 +131,28 @@ def predict_harvest_failure(region_name: str, start_date: str = None, use_csv: b
     # Interpretasi
     risk_level = "Tinggi" if latest_prediction >= 0.7 else "Sedang" if latest_prediction >= threshold else "Rendah"
     
+    # Import modul rekomendasi
+    import recommendations as rec
+    
+    # Dapatkan alasan dan rekomendasi
+    if is_failure:
+        reasons = rec.get_failure_reasons(latest_prediction, df_weather, df_harvest)
+    else:
+        reasons = rec.get_success_reasons(latest_prediction, df_weather, df_harvest)
+    
+    mitigation = rec.get_mitigation_recommendations(latest_prediction, risk_level, df_weather)
+    weather_forecast = rec.get_weather_forecast(df_weather, months=3)
+    
     result = {
         'region': region_name,
         'probability': round(latest_prediction, 4),
         'threshold': threshold,
         'prediction': 'Gagal Panen' if is_failure else 'Normal',
         'risk_level': risk_level,
-        'confidence': 'Tinggi' if abs(latest_prediction - threshold) > 0.2 else 'Sedang'
+        'confidence': 'Tinggi' if abs(latest_prediction - threshold) > 0.2 else 'Sedang',
+        'reasons': reasons,
+        'mitigation_recommendations': mitigation,
+        'weather_forecast': weather_forecast
     }
     
     return result

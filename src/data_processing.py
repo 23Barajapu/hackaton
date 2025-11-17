@@ -176,9 +176,10 @@ def preprocess_features(df_harvest: pd.DataFrame, df_weather: pd.DataFrame, scal
     df_weather_proc_indexed = df_weather_proc.set_index(config.DATE_COLUMN)
     
     # Groupby dan resample, pastikan Wilayah tetap ada
+    # Gunakan include_groups=False untuk menghindari warning
     df_weather_weekly = (df_weather_proc_indexed
                         .groupby('Wilayah', group_keys=True)
-                        .resample(config.TIME_AGGREGATION_RULE)
+                        .resample(config.TIME_AGGREGATION_RULE, include_groups=False)
                         .sum(numeric_only=True)
                         .reset_index(level=0, drop=False))  # Reset hanya level 0 (Tanggal), keep Wilayah
     
