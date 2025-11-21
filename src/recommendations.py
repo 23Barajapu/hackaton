@@ -116,20 +116,20 @@ def get_mitigation_recommendations(probability: float, risk_level: str, df_weath
     recommendations = []
     
     if risk_level == "Tinggi" or probability >= 0.7:
-        recommendations.append("🚨 TINDAKAN SEGERA DIPERLUKAN")
-        recommendations.append("• Tingkatkan monitoring lahan secara intensif (setiap 2-3 hari)")
-        recommendations.append("• Siapkan sistem drainase darurat untuk mengatasi genangan air")
-        recommendations.append("• Pertimbangkan untuk memanen lebih awal jika tanaman sudah cukup matang")
-        recommendations.append("• Hubungi dinas pertanian setempat untuk bantuan teknis")
-        recommendations.append("• Pertimbangkan asuransi pertanian untuk melindungi kerugian")
+        recommendations.append("[ALERT] TINDAKAN SEGERA DIPERLUKAN")
+        recommendations.append("- Tingkatkan monitoring lahan secara intensif (setiap 2-3 hari)")
+        recommendations.append("- Siapkan sistem drainase darurat untuk mengatasi genangan air")
+        recommendations.append("- Pertimbangkan memanen lebih awal jika tanaman sudah cukup matang")
+        recommendations.append("- Hubungi dinas pertanian setempat untuk bantuan teknis")
+        recommendations.append("- Pertimbangkan asuransi pertanian untuk melindungi kerugian")
     
     if risk_level == "Sedang" or (probability >= 0.5 and probability < 0.7):
-        recommendations.append("⚠️ PERHATIAN KHUSUS DIPERLUKAN")
-        recommendations.append("• Monitor kondisi lahan secara rutin (setiap minggu)")
-        recommendations.append("• Pastikan sistem irigasi dan drainase berfungsi dengan baik")
-        recommendations.append("• Lakukan pemupukan sesuai jadwal dan dosis yang tepat")
-        recommendations.append("• Waspada terhadap hama dan penyakit tanaman")
-        recommendations.append("• Siapkan rencana cadangan jika kondisi memburuk")
+        recommendations.append("[NOTICE] PERHATIAN KHUSUS DIPERLUKAN")
+        recommendations.append("- Monitor kondisi lahan secara rutin (setiap minggu)")
+        recommendations.append("- Pastikan sistem irigasi dan drainase berfungsi dengan baik")
+        recommendations.append("- Lakukan pemupukan sesuai jadwal dan dosis yang tepat")
+        recommendations.append("- Waspada terhadap hama dan penyakit tanaman")
+        recommendations.append("- Siapkan rencana cadangan jika kondisi memburuk")
     
     # Rekomendasi berdasarkan cuaca ekstrem
     if not df_weather.empty and config.WEATHER_EVENT_COLUMN in df_weather.columns:
@@ -137,26 +137,26 @@ def get_mitigation_recommendations(probability: float, risk_level: str, df_weath
         event_counts = weather_events.value_counts()
         
         if 'Hujan Lebat' in event_counts.index and event_counts['Hujan Lebat'] > 5:
-            recommendations.append("• Perbaiki saluran drainase untuk mengatasi hujan lebat")
-            recommendations.append("• Hindari penanaman di area yang rawan banjir")
-            recommendations.append("• Gunakan varietas padi yang tahan genangan")
+            recommendations.append("- Perbaiki saluran drainase untuk mengatasi hujan lebat")
+            recommendations.append("- Hindari penanaman di area yang rawan banjir")
+            recommendations.append("- Gunakan varietas padi yang tahan genangan")
         
         if 'Angin Kencang' in event_counts.index and event_counts['Angin Kencang'] > 3:
-            recommendations.append("• Tanam tanaman pelindung di sekeliling lahan")
-            recommendations.append("• Perkuat struktur penopang tanaman jika diperlukan")
+            recommendations.append("- Tanam tanaman pelindung di sekeliling lahan")
+            recommendations.append("- Perkuat struktur penopang tanaman jika diperlukan")
         
         if 'Puting Beliung' in event_counts.index:
-            recommendations.append("• Waspada terhadap puting beliung, siapkan rencana evakuasi")
+            recommendations.append("- Waspada terhadap puting beliung, siapkan rencana evakuasi")
     
     # Rekomendasi umum perawatan lahan
-    recommendations.append("📋 PERAWATAN RUTIN LAHAN PADI:")
-    recommendations.append("• Lakukan penyiangan gulma secara berkala")
-    recommendations.append("• Pantau ketersediaan air irigasi")
-    recommendations.append("• Lakukan pemupukan berimbang (N, P, K)")
-    recommendations.append("• Kontrol hama dan penyakit dengan pestisida yang tepat")
-    recommendations.append("• Gunakan benih berkualitas dan varietas yang sesuai")
-    recommendations.append("• Lakukan rotasi tanaman untuk menjaga kesuburan tanah")
-    recommendations.append("• Terapkan sistem tanam jajar legowo untuk hasil optimal")
+    recommendations.append("[GUIDE] PERAWATAN RUTIN LAHAN PADI:")
+    recommendations.append("- Lakukan penyiangan gulma secara berkala")
+    recommendations.append("- Pantau ketersediaan air irigasi")
+    recommendations.append("- Lakukan pemupukan berimbang (N, P, K)")
+    recommendations.append("- Kontrol hama dan penyakit dengan pestisida yang tepat")
+    recommendations.append("- Gunakan benih berkualitas dan varietas yang sesuai")
+    recommendations.append("- Lakukan rotasi tanaman untuk menjaga kesuburan tanah")
+    recommendations.append("- Terapkan sistem tanam jajar legowo untuk hasil optimal")
     
     return recommendations
 

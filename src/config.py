@@ -1,6 +1,3 @@
-"""
-File konfigurasi terpusat untuk konstanta dan hyperparameter model.
-"""
 import numpy as np
 import tensorflow as tf
 

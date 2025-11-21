@@ -1,0 +1,154 @@
+2025-11-21 19:44:29.700142: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-11-21 19:44:48.613273: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-11-21 19:45:04.882984: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Memuat model dan artefak...
+Memprediksi untuk wilayah: Bandung
+Memuat data dari file CSV lokal...
+Data panen dimuat: (999, 5) baris
+Data cuaca dimuat: (2305, 5) baris
+Memproses data...
+Memulai pra-pemrosesan fitur...
+Membuat sekuens (windowing) dengan panjang 12...
+Menjalankan prediksi...
+
+============================================================
+HASIL PREDIKSI
+============================================================
+{
+  "region": "Bandung",
+  "probability": 0.0001,
+  "threshold": 0.5,
+  "prediction": "Normal",
+  "risk_level": "Rendah",
+  "confidence": "Tinggi",
+  "reasons": [
+    "Probabilitas gagal panen sangat rendah (<30%)"
+  ],
+  "mitigation_recommendations": [
+    "- Perbaiki saluran drainase untuk mengatasi hujan lebat",
+    "- Hindari penanaman di area yang rawan banjir",
+    "- Gunakan varietas padi yang tahan genangan",
+    "- Tanam tanaman pelindung di sekeliling lahan",
+    "- Perkuat struktur penopang tanaman jika diperlukan",
+    "- Waspada terhadap puting beliung, siapkan rencana evakuasi",
+    "[GUIDE] PERAWATAN RUTIN LAHAN PADI:",
+    "- Lakukan penyiangan gulma secara berkala",
+    "- Pantau ketersediaan air irigasi",
+    "- Lakukan pemupukan berimbang (N, P, K)",
+    "- Kontrol hama dan penyakit dengan pestisida yang tepat",
+    "- Gunakan benih berkualitas dan varietas yang sesuai",
+    "- Lakukan rotasi tanaman untuk menjaga kesuburan tanah",
+    "- Terapkan sistem tanam jajar legowo untuk hasil optimal"
+  ],
+  "weather_forecast": {
+    "forecast": [
+      {
+        "bulan": 11,
+        "tahun": 2025,
+        "nama_bulan": "November 2025",
+        "prediksi_kejadian": 32,
+        "cuaca_ekstrem": {
+          "Hujan Lebat": 28,
+          "Angin Kencang": 15,
+          "Puting Beliung": 1
+        },
+        "catatan": "Berdasarkan rata-rata 32 kejadian historis di bulan 11"
+      },
+      {
+        "bulan": 12,
+        "tahun": 2025,
+        "nama_bulan": "December 2025",
+        "prediksi_kejadian": 41,
+        "cuaca_ekstrem": {
+          "Hujan Lebat": 37,
+          "Angin Kencang": 10,
+          "Puting Beliung": 4
+        },
+        "catatan": "Berdasarkan rata-rata 41 kejadian historis di bulan 12"
+      },
+      {
+        "bulan": 1,
+        "tahun": 2026,
+        "nama_bulan": "January 2026",
+        "prediksi_kejadian": 19,
+        "cuaca_ekstrem": {
+          "Hujan Lebat": 16,
+          "Angin Kencang": 3,
+          "Puting Beliung": 2
+        },
+        "catatan": "Berdasarkan rata-rata 19 kejadian historis di bulan 1"
+      }
+    ],
+    "note": "Prediksi berdasarkan pola historis data cuaca ekstrem. Prediksi ini bersifat estimasi dan dapat berubah."
+  },
+  "web_summary": {
+    "sections": [
+      {
+        "title": "Hasil Prediksi AI",
+        "content": [
+          "Normal (Probabilitas 0.0%, Risiko Rendah)"
+        ]
+      },
+      {
+        "title": "Analisis & Alasan Prediksi",
+        "content": [
+          "Probabilitas gagal panen sangat rendah (<30%)"
+        ]
+      },
+      {
+        "title": "Data Cuaca Historis (04 January 2018 - 18 December 2024)",
+        "content": [
+          "Suhu Rata-rata: Data tidak tersedia",
+          "Kelembapan: Data tidak tersedia",
+          "Curah Hujan: Data tidak tersedia",
+          "Angin: Data tidak tersedia"
+        ]
+      },
+      {
+        "title": "Ringkasan Cuaca",
+        "content": [
+          "Kejadian paling sering: Hujan Lebat (240 kali) selama periode historis."
+        ]
+      },
+      {
+        "title": "Kesimpulan Detail",
+        "content": [
+          "Prediksi akhir: Normal dengan probabilitas 0.0% dan level risiko Rendah."
+        ]
+      },
+      {
+        "title": "Rekomendasi Mitigasi Penanganan",
+        "subsections": [
+          {
+            "subtitle": "Mitigasi Prioritas",
+            "content": [
+              "- Perbaiki saluran drainase untuk mengatasi hujan lebat",
+              "- Hindari penanaman di area yang rawan banjir",
+              "- Gunakan varietas padi yang tahan genangan",
+              "- Tanam tanaman pelindung di sekeliling lahan",
+              "- Perkuat struktur penopang tanaman jika diperlukan",
+              "- Waspada terhadap puting beliung, siapkan rencana evakuasi",
+              "[GUIDE] PERAWATAN RUTIN LAHAN PADI:",
+              "- Lakukan penyiangan gulma secara berkala",
+              "- Pantau ketersediaan air irigasi",
+              "- Lakukan pemupukan berimbang (N, P, K)",
+              "- Kontrol hama dan penyakit dengan pestisida yang tepat",
+              "- Gunakan benih berkualitas dan varietas yang sesuai",
+              "- Lakukan rotasi tanaman untuk menjaga kesuburan tanah",
+              "- Terapkan sistem tanam jajar legowo untuk hasil optimal"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Prakiraan Cuaca BMKG (3 Bulan Kedepan)",
+        "content": [
+          "November 2025: 32 potensi kejadian ekstrem (Dominan: Hujan Lebat, Angin Kencang). Berdasarkan rata-rata 32 kejadian historis di bulan 11",
+          "December 2025: 41 potensi kejadian ekstrem (Dominan: Hujan Lebat, Angin Kencang). Berdasarkan rata-rata 41 kejadian historis di bulan 12",
+          "January 2026: 19 potensi kejadian ekstrem (Dominan: Hujan Lebat, Angin Kencang). Berdasarkan rata-rata 19 kejadian historis di bulan 1"
+        ]
+      }
+    ]
+  }
+}

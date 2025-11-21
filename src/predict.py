@@ -152,7 +152,17 @@ def predict_harvest_failure(region_name: str, start_date: str = None, use_csv: b
         'confidence': 'Tinggi' if abs(latest_prediction - threshold) > 0.2 else 'Sedang',
         'reasons': reasons,
         'mitigation_recommendations': mitigation,
-        'weather_forecast': weather_forecast
+        'weather_forecast': weather_forecast,
+        'web_summary': build_web_summary(
+            prediction_label='Gagal Panen' if is_failure else 'Normal',
+            probability=latest_prediction,
+            risk_level=risk_level,
+            df_weather=df_weather,
+            df_harvest=df_harvest,
+            reasons=reasons,
+            mitigation=mitigation,
+            weather_forecast=weather_forecast
+        )
     }
     
     return result
@@ -179,6 +189,154 @@ def predict_batch(regions: list, use_csv: bool = True):
                 'error': str(e)
             })
     return results
+
+def build_web_summary(
+    prediction_label: str,
+    probability: float,
+    risk_level: str,
+    df_weather: pd.DataFrame,
+    df_harvest: pd.DataFrame,
+    reasons: list,
+    mitigation: list,
+    weather_forecast: dict
+) -> dict:
+    """
+    Membentuk ringkasan deskriptif berbasis data aktual untuk ditampilkan di UI.
+    """
+    period_label = _get_weather_period_label(df_weather)
+    weather_stats = _build_weather_stats(df_weather)
+    analysis_content = _build_analysis_content(reasons, df_harvest)
+    weather_summary = _build_weather_summary(df_weather)
+    conclusion_text = (
+        f"Prediksi akhir: {prediction_label} dengan probabilitas "
+        f"{probability * 100:.1f}% dan level risiko {risk_level}."
+    )
+    mitigation_sections = _build_mitigation_sections(mitigation)
+    forecast_lines = _build_forecast_lines(weather_forecast)
+
+    return {
+        "sections": [
+            {
+                "title": "Hasil Prediksi AI",
+                "content": [
+                    f"{prediction_label} (Probabilitas {probability * 100:.1f}%, Risiko {risk_level})"
+                ]
+            },
+            {
+                "title": "Analisis & Alasan Prediksi",
+                "content": analysis_content
+            },
+            {
+                "title": f"Data Cuaca Historis ({period_label})",
+                "content": weather_stats
+            },
+            {
+                "title": "Ringkasan Cuaca",
+                "content": [weather_summary]
+            },
+            {
+                "title": "Kesimpulan Detail",
+                "content": [conclusion_text]
+            },
+            {
+                "title": "Rekomendasi Mitigasi Penanganan",
+                "subsections": mitigation_sections
+            },
+            {
+                "title": "Prakiraan Cuaca BMKG (3 Bulan Kedepan)",
+                "content": forecast_lines
+            }
+        ]
+    }
+
+def _get_weather_period_label(df_weather: pd.DataFrame) -> str:
+    if df_weather.empty or config.DATE_COLUMN not in df_weather.columns:
+        return "Data tidak tersedia"
+    start_date = df_weather[config.DATE_COLUMN].min()
+    end_date = df_weather[config.DATE_COLUMN].max()
+    if pd.isna(start_date) or pd.isna(end_date):
+        return "Data tidak tersedia"
+    start_label = start_date.strftime("%d %B %Y")
+    end_label = end_date.strftime("%d %B %Y")
+    if start_label == end_label:
+        return start_label
+    return f"{start_label} - {end_label}"
+
+def _build_weather_stats(df_weather: pd.DataFrame) -> list:
+    stats = []
+    stats.append(_format_numeric_metric(df_weather, ["suhu", "temperature"], "Suhu Rata-rata", "°C"))
+    stats.append(_format_numeric_metric(df_weather, ["lembap", "humidity"], "Kelembapan", "%"))
+    stats.append(_format_numeric_metric(df_weather, ["hujan", "precip"], "Curah Hujan", "mm"))
+    stats.append(_format_numeric_metric(df_weather, ["angin", "wind"], "Angin", " km/jam"))
+    return stats
+
+def _format_numeric_metric(df: pd.DataFrame, keywords: list, label: str, unit: str) -> str:
+    if df.empty:
+        return f"{label}: Data tidak tersedia"
+    column = _find_column_by_keywords(df.columns, keywords)
+    if column:
+        series = pd.to_numeric(df[column], errors='coerce').dropna()
+        if not series.empty:
+            value = series.mean()
+            return f"{label}: {value:.1f}{unit}".rstrip()
+    return f"{label}: Data tidak tersedia"
+
+def _find_column_by_keywords(columns, keywords):
+    for col in columns:
+        col_lower = col.lower()
+        for key in keywords:
+            if key in col_lower:
+                return col
+    return None
+
+def _build_analysis_content(reasons: list, df_harvest: pd.DataFrame) -> list:
+    analysis = reasons.copy() if reasons else []
+    if not df_harvest.empty and 'Produktivitas' in df_harvest.columns:
+        prod_mean = df_harvest['Produktivitas'].dropna().mean()
+        if pd.notna(prod_mean):
+            analysis.append(f"Rata-rata produktivitas historis: {prod_mean:.2f} ku/ha.")
+    if not analysis:
+        analysis.append("Tidak ada analisis tambahan yang tersedia.")
+    return analysis
+
+def _build_weather_summary(df_weather: pd.DataFrame) -> str:
+    if df_weather.empty or config.WEATHER_EVENT_COLUMN not in df_weather.columns:
+        return "Data cuaca ekstrem tidak tersedia."
+    events = (
+        df_weather[config.WEATHER_EVENT_COLUMN]
+        .dropna()
+        .str.split(', ', expand=True)
+        .stack()
+    )
+    if events.empty:
+        return "Tidak ada catatan cuaca ekstrem pada periode ini."
+    counts = events.value_counts()
+    top_event = counts.index[0]
+    top_count = counts.iloc[0]
+    return f"Kejadian paling sering: {top_event} ({top_count} kali) selama periode historis."
+
+def _build_mitigation_sections(mitigation: list) -> list:
+    if not mitigation:
+        return [{"subtitle": "Umum", "content": ["Tidak ada rekomendasi yang tersedia."]}]
+    return [{"subtitle": "Mitigasi Prioritas", "content": mitigation}]
+
+def _build_forecast_lines(weather_forecast: dict) -> list:
+    if not weather_forecast or 'forecast' not in weather_forecast:
+        return ["Data prakiraan belum tersedia."]
+    lines = []
+    for item in weather_forecast.get('forecast', []):
+        name = item.get('nama_bulan', 'Periode')
+        events = item.get('prediksi_kejadian', 0)
+        notes = item.get('catatan', '')
+        extreme = item.get('cuaca_ekstrem', {})
+        if extreme:
+            dominant = ', '.join(list(extreme.keys())[:2])
+            lines.append(f"{name}: {events} potensi kejadian ekstrem (Dominan: {dominant}). {notes}")
+        else:
+            lines.append(f"{name}: {events} potensi kejadian ekstrem. {notes}")
+    if not lines:
+        lines.append(weather_forecast.get('note', 'Data prakiraan belum tersedia.'))
+    return lines
 
 if __name__ == "__main__":
     import argparse
